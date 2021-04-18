@@ -1,10 +1,8 @@
 use data_encoding::BASE64;
 use mac_address::{get_mac_address, MacAddress, MacAddressError};
 use std::{
-    convert::TryFrom,
-    fmt::{Display, Write},
-    io::Read,
-    time::{Duration, Instant, SystemTime},
+    fmt::{Binary, Display},
+    time::{Duration, SystemTime},
     u128,
 };
 
@@ -23,7 +21,6 @@ pub struct FlakeGen {
     seq: u16,
 }
 
-const TIME_BITS: usize = 64;
 const ADDR_BITS: usize = 48;
 const SEQ_BITS: usize = 16;
 
@@ -57,25 +54,12 @@ impl FlakeGen {
     }
 
     fn build(time: u128, node: u64, seq: u16) -> u128 {
-        println!("{}.{}.{}", time, node, seq);
         let node: u128 = node as u128;
         let seq: u128 = seq as u128;
-
-        println!("{:#0128b}", time);
-        println!("{:#0128b}", node);
-        println!("{:#0128b}", seq);
-
         let time = time << (ADDR_BITS + SEQ_BITS);
         let node = node << SEQ_BITS;
 
-        println!("Shifted <<");
-        println!("{:#0128b}", time);
-        println!("{:#0128b}", node);
-        println!("{:#0128b}", seq);
-
-        let id: u128 = dbg!(node ^ time ^ seq);
-        println!("{:#0128b}", id);
-        id
+        node ^ time ^ seq
     }
 
     fn time() -> Result<u128, FlakeErr> {
@@ -125,6 +109,12 @@ impl PartialOrd for Flake {
     }
 }
 
+impl Binary for Flake {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Binary::fmt(&self.0, f)
+    }
+}
+
 #[derive(Debug)]
 pub enum FlakeErr {
     TimeDrift,
@@ -138,9 +128,10 @@ mod tests {
     #[test]
     fn two_ids_are_not_same() {
         let mut gen = FlakeGen::new().unwrap();
-        let id1 = gen.gen().unwrap();
-        let id2 = gen.gen().unwrap();
-        println!("{} vs {}", id1, id2);
+        let id1: Flake = gen.gen().unwrap();
+        let id2: Flake = gen.gen().unwrap();
+        println!("{} vs \n{}", id1, id2);
+        println!("{:#0128b} vs \n{:#0128b}", id1, id2);
         assert_ne!(id1, id2);
     }
 }
