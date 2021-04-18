@@ -88,6 +88,8 @@ impl FlakeGen {
 #[derive(Debug)]
 #[non_exhaustive]
 pub enum FlakeGenErr {
+    /// No MAC address could be found on the host device, which makes it impossible to generate
+    /// flake ids that are globally unique.
     NoMacAddr,
 }
 
@@ -117,7 +119,15 @@ impl Binary for Flake {
 
 #[derive(Debug)]
 pub enum FlakeErr {
+    /// A time drift (or clock skew) occured backwards in time on the host operating system.
+    /// Generating new IDs while the current OS time is earlier than the time of generation for the
+    /// last succesfully generated ID is not safe, since it could result in the same ID being
+    /// generated twice.
     TimeDrift,
+    /// The sequence number has been temporarily exhausted. This will happen if more IDs than
+    /// what can be held in a u16 (65 536) is generated in a millisecond. When this occurs it is
+    /// always possible to retry generating a flake id the next millisecond since that will reset
+    /// the sequence counter.
     Exhausted,
 }
 
