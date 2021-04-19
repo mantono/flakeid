@@ -42,4 +42,4 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           args: --all-features
       - name: rustfmt
-        run: rustfmt --check src/* build.rs
+        run: rustfmt --check src/*
