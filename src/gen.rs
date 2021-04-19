@@ -18,7 +18,7 @@ impl From<MacAddressError> for FlakeGenErr {
 
 impl FlakeGen {
     pub fn new() -> Result<FlakeGen, FlakeGenErr> {
-        let mac_addr: MacAddress = get_mac_address()?.ok_or_else(|| FlakeGenErr::NoMacAddr)?;
+        let mac_addr: MacAddress = get_mac_address()?.ok_or(FlakeGenErr::NoMacAddr)?;
         let mac_addr: u64 = mac_addr
             .bytes()
             .iter()
