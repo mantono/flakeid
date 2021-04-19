@@ -1,6 +1,6 @@
 use mac_address::{get_mac_address, MacAddress, MacAddressError};
 
-use crate::{seq::SeqGen, Flake};
+use crate::{id::Flake, seq::SeqGen};
 
 pub struct FlakeGen {
     mac_addr: u64,
@@ -34,7 +34,7 @@ impl FlakeGen {
     pub fn try_next(&mut self) -> Result<Flake, FlakeErr> {
         let (timestamp, seq): (u128, u16) = self.seq.try_next()?;
         let value: u128 = Self::build(timestamp, self.mac_addr, seq);
-        Ok(Flake(value))
+        Ok(Flake::new(value))
     }
 
     fn build(time: u128, node: u64, seq: u16) -> u128 {
