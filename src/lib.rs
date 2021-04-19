@@ -8,7 +8,7 @@ use std::{
 mod gen;
 mod seq;
 
-#[derive(Debug, Eq, Ord, Clone, Copy)]
+#[derive(Debug, Eq, Clone, Copy)]
 pub struct Flake(u128);
 
 impl Display for Flake {
@@ -32,6 +32,12 @@ impl PartialEq for Flake {
 impl PartialOrd for Flake {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         Some(self.0.cmp(&other.0))
+    }
+}
+
+impl Ord for Flake {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.0.cmp(&other.0)
     }
 }
 
