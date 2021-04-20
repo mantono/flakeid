@@ -10,13 +10,15 @@ pub struct FlakeGen {
 const ADDR_BITS: usize = 48;
 const SEQ_BITS: usize = 16;
 
-impl From<MacAddressError> for FlakeGenErr {
-    fn from(_: MacAddressError) -> Self {
-        FlakeGenErr::NoMacAddr
-    }
-}
-
 impl FlakeGen {
+    /// Create a new Flake ID generator. The creation may fail if it is not possible to find any
+    /// device with a MAC address.
+    /// ```
+    /// use flakeid::id::Flake;
+    /// use flakeid::gen::FlakeGen;
+    /// let mut gen = FlakeGen::new().expect("Creating generator failed");
+    /// let id: Flake = gen.next().expect("No ID was generated");
+    /// ```
     pub fn new() -> Result<FlakeGen, FlakeGenErr> {
         let mac_addr: MacAddress = get_mac_address()?.ok_or(FlakeGenErr::NoMacAddr)?;
         let mac_addr: u64 = mac_addr
@@ -61,6 +63,12 @@ pub enum FlakeGenErr {
     /// No MAC address could be found on the host device, which makes it impossible to generate
     /// flake ids that are globally unique.
     NoMacAddr,
+}
+
+impl From<MacAddressError> for FlakeGenErr {
+    fn from(_: MacAddressError) -> Self {
+        FlakeGenErr::NoMacAddr
+    }
 }
 
 #[derive(Debug)]

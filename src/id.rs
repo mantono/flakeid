@@ -8,12 +8,6 @@ use std::{
 #[derive(Debug, Eq, Clone, Copy)]
 pub struct Flake(u128);
 
-impl Display for Flake {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(&BASE64.encode(&self.0.to_be_bytes()))
-    }
-}
-
 impl Flake {
     pub(crate) fn new(value: u128) -> Flake {
         Self(value)
@@ -51,6 +45,12 @@ impl Hash for Flake {
 impl Binary for Flake {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Binary::fmt(&self.0, f)
+    }
+}
+
+impl Display for Flake {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&BASE64.encode(&self.0.to_be_bytes()))
     }
 }
 
