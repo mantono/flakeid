@@ -144,4 +144,13 @@ mod tests {
         let id2: Flake = gen.next().unwrap();
         assert_ne!(id1, id2);
     }
+
+    #[test]
+    fn test_first_id_less_than_second() {
+        let mut gen = FlakeGen::new().unwrap();
+        let id1: Flake = gen.next().unwrap();
+        let id2: Flake = gen.next().unwrap();
+        assert!(id1 < id2);
+        assert!(id2 > id1);
+    }
 }
