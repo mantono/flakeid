@@ -38,13 +38,24 @@ impl<'de> Visitor<'de> for FlakeVisitor {
     where
         E: Error,
     {
-        let decoded_bytes = data_encoding::BASE64.decode(v.as_bytes()).unwrap();
+        let decoded_bytes = match data_encoding::BASE64.decode(v.as_bytes()) {
+            Ok(bytes) => bytes,
+            Err(e) => return Err(E::custom(format!("Unable to decode Base64: {}", e))),
+        };
+
         let mut bytes = [0u8; 16];
         for (i, byte) in decoded_bytes.iter().enumerate() {
             bytes[i] = *byte;
         }
         let value = u128::from_be_bytes(bytes);
         Ok(Flake::new(value))
+    }
+
+    fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+    where
+        E: Error,
+    {
+        FlakeVisitor::visit_string(self, v.to_string())
     }
 }
 
