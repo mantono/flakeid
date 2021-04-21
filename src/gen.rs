@@ -11,7 +11,7 @@ const ADDR_BITS: usize = 48;
 const SEQ_BITS: usize = 16;
 
 impl FlakeGen {
-    /// Create a new Flake ID generator. The creation may fail if it is not possible to find any
+    /// Create a new flake ID generator. The creation may fail if it is not possible to find any
     /// device with a MAC address.
     /// ```
     /// use flakeid::id::Flake;
@@ -33,6 +33,8 @@ impl FlakeGen {
         Ok(gen)
     }
 
+    /// Try to generate a flake ID. The generation may fail if a clock skew occurs or if
+    /// the sequence number has been exhausted, but should otherwise generate an ID successfully.
     pub fn try_next(&mut self) -> Result<Flake, FlakeErr> {
         let (timestamp, seq): (u128, u16) = self.seq.try_next()?;
         let value: u128 = Self::build(timestamp, self.mac_addr, seq);
@@ -79,8 +81,8 @@ pub enum FlakeErr {
     /// generated twice.
     TimeDrift,
     /// The sequence number has been temporarily exhausted. This will happen if more IDs than
-    /// what can be held in a u16 (65 536) is generated in a millisecond. When this occurs it is
-    /// always possible to retry generating a flake id the next millisecond since that will reset
+    /// what can be held in two bytes (65 536) is generated in a millisecond. When this occurs it is
+    /// always possible to retry generating a flake ID the next millisecond since that will reset
     /// the sequence counter.
     Exhausted,
 }
