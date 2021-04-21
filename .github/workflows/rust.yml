@@ -2,12 +2,12 @@ name: Build & Test
 on:
   push:
     paths:
-      - '**/Cargo.toml'
-      - '**/Cargo.lock'
-      - 'src/**'
-      - 'tests/**'
-      - 'build.rs'
-      - '.github/workflows/rust.yml'
+      - "**/Cargo.toml"
+      - "**/Cargo.lock"
+      - "src/**"
+      - "tests/**"
+      - "build.rs"
+      - ".github/workflows/rust.yml"
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -16,21 +16,23 @@ jobs:
         os: [macos-latest, windows-latest, ubuntu-latest]
       max-parallel: 3
       fail-fast: false
+    env:
+      QUICKCHECK_TESTS: 1000000
     steps:
-    - uses: actions/checkout@v1
-    - uses: actions/cache@v1
-      id: cache-cargo-fetch
-      with:
-        key: ${{ runner.os }}-cargo-fetch-${{ hashFiles('Cargo.lock') }}
-        path: target
-        restore-keys: ${{ runner.os }}-cargo-fetch
-    - name: Fetch Dependencies
-      if: steps.cache-cargo-fetch.outputs.cache-hit != 'true'
-      run: cargo fetch
-    - name: Build
-      run: cargo build --all-features
-    - name: Run tests
-      run: cargo test
+      - uses: actions/checkout@v1
+      - uses: actions/cache@v1
+        id: cache-cargo-fetch
+        with:
+          key: ${{ runner.os }}-cargo-fetch-${{ hashFiles('Cargo.lock') }}
+          path: target
+          restore-keys: ${{ runner.os }}-cargo-fetch
+      - name: Fetch Dependencies
+        if: steps.cache-cargo-fetch.outputs.cache-hit != 'true'
+        run: cargo fetch
+      - name: Build
+        run: cargo build --all-features
+      - name: Run tests
+        run: cargo test
 
   lint:
     runs-on: ubuntu-latest

@@ -53,18 +53,3 @@ impl Display for Flake {
         f.write_str(&BASE64.encode(&self.0.to_be_bytes()))
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use crate::gen::FlakeGen;
-    use crate::id::Flake;
-    #[test]
-    fn two_ids_are_not_same() {
-        let mut gen = FlakeGen::new().unwrap();
-        let id1: Flake = gen.next().unwrap();
-        let id2: Flake = gen.next().unwrap();
-        println!("{} vs \n{}", id1, id2);
-        println!("{:#0128b} vs \n{:#0128b}", id1, id2);
-        assert_ne!(id1, id2);
-    }
-}

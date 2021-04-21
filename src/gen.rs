@@ -86,3 +86,62 @@ pub enum FlakeErr {
     /// the sequence counter.
     Exhausted,
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::gen::FlakeGen;
+    use crate::id::Flake;
+
+    #[quickcheck]
+    fn test_different_timestamp_should_yield_different_value(
+        ts0: u128,
+        ts1: u128,
+        node: u64,
+        seq: u16,
+    ) -> bool {
+        if ts0 == ts1 {
+            return true;
+        }
+        let id0 = FlakeGen::build(ts0, node, seq);
+        let id1 = FlakeGen::build(ts1, node, seq);
+        id0 != id1
+    }
+
+    #[quickcheck]
+    fn test_different_node_should_yield_different_value(
+        ts: u128,
+        node0: u64,
+        node1: u64,
+        seq: u16,
+    ) -> bool {
+        if node0 == node1 {
+            return true;
+        }
+        let id0 = FlakeGen::build(ts, node0, seq);
+        let id1 = FlakeGen::build(ts, node1, seq);
+        id0 != id1
+    }
+
+    #[quickcheck]
+    fn test_different_seq_should_yield_different_value(
+        ts: u128,
+        node: u64,
+        seq0: u16,
+        seq1: u16,
+    ) -> bool {
+        if seq0 == seq1 {
+            return true;
+        }
+        let id0 = FlakeGen::build(ts, node, seq0);
+        let id1 = FlakeGen::build(ts, node, seq1);
+        id0 != id1
+    }
+
+    #[test]
+    fn two_ids_are_not_same() {
+        let mut gen = FlakeGen::new().unwrap();
+        let id1: Flake = gen.next().unwrap();
+        let id2: Flake = gen.next().unwrap();
+        assert_ne!(id1, id2);
+    }
+}
