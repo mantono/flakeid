@@ -44,7 +44,7 @@ impl<'de> Visitor<'de> for FlakeVisitor {
         };
 
         let mut bytes = [0u8; 16];
-        for (i, byte) in decoded_bytes.iter().enumerate() {
+        for (i, byte) in decoded_bytes.iter().take(bytes.len()).enumerate() {
             bytes[i] = *byte;
         }
         let value = u128::from_be_bytes(bytes);
