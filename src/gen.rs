@@ -41,6 +41,12 @@ impl FlakeGen {
         Ok(Flake::new(value))
     }
 
+    /// Perform the neccessary bit manipulations to transform
+    /// 0000 0000 aaaa aaaa (timestamp) << 16 * 8
+    /// 0000 0000 00bb bbbb (node) << 2 * 8
+    /// 0000 0000 0000 00cc (seq)
+    /// into                XOR
+    /// aaaa aaaa bbbb bbcc
     fn build(time: u128, node: u64, seq: u16) -> u128 {
         let node: u128 = node as u128;
         let seq: u128 = seq as u128;
