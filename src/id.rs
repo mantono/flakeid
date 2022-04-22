@@ -16,6 +16,12 @@ impl Flake {
     pub fn value(&self) -> u128 {
         self.0
     }
+
+    /// Byte array representation of the Flake ID, in native byte order
+    #[inline(always)]
+    pub fn bytes(&self) -> [u8; 16] {
+        self.0.to_ne_bytes()
+    }
 }
 
 impl PartialEq for Flake {
