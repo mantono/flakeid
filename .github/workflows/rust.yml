@@ -6,6 +6,7 @@ on:
       - "**/Cargo.lock"
       - "src/**"
       - "tests/**"
+      - "examples/**"
       - "build.rs"
       - ".github/workflows/rust.yml"
 jobs:
