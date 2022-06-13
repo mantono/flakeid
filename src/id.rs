@@ -24,7 +24,7 @@ impl Flake {
         self.0.to_le_bytes()
     }
 
-    /// Created a flake id from an array of 16 bytes. Endianness of the byte array is assumed to be
+    /// Creates a flake id from an array of 16 bytes. Endianness of the byte array is assumed to be
     /// little endianess.
     pub fn from_bytes(bytes: [u8; 16]) -> Flake {
         Flake::new(u128::from_le_bytes(bytes))
