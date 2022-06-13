@@ -21,10 +21,8 @@ impl FlakeGen {
     /// ```
     pub fn new() -> Result<FlakeGen, FlakeGenErr> {
         let mac_addr: MacAddress = get_mac_address()?.ok_or(FlakeGenErr::NoMacAddr)?;
-        let mac_addr: u64 = mac_addr
-            .bytes()
-            .iter()
-            .fold(0u64, |acc, value| (acc << 8) + (*value as u64));
+        let mac_addr: u64 =
+            mac_addr.bytes().iter().fold(0u64, |acc, value| (acc << 8) + (*value as u64));
 
         let gen = FlakeGen {
             mac_addr,
