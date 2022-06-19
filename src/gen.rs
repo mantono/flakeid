@@ -10,6 +10,7 @@ pub struct FlakeGen {
 const ADDR_BITS: usize = 48;
 const SEQ_BITS: usize = 16;
 
+/// TEST!
 impl FlakeGen {
     /// Create a new flake ID generator. The creation may fail if it is not possible to find any
     /// device with a MAC address.
