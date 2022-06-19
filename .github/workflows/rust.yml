@@ -24,9 +24,13 @@ jobs:
       - uses: actions/cache@v3
         id: cache-cargo-fetch
         with:
-          key: ${{ runner.os }}-cargo-fetch-${{ hashFiles('Cargo.lock') }}
-          path: target
-          restore-keys: ${{ runner.os }}-cargo-fetch
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       - name: Fetch Dependencies
         if: steps.cache-cargo-fetch.outputs.cache-hit != 'true'
         run: cargo fetch
