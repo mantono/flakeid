@@ -21,7 +21,7 @@ jobs:
       QUICKCHECK_TESTS: 1000000
     steps:
       - uses: actions/checkout@v1
-      - uses: actions/cache@v1
+      - uses: actions/cache@v3
         id: cache-cargo-fetch
         with:
           key: ${{ runner.os }}-cargo-fetch-${{ hashFiles('Cargo.lock') }}
