@@ -16,6 +16,19 @@ impl Flake {
     pub fn value(&self) -> u128 {
         self.0
     }
+
+    /// Byte array representation of the Flake ID. Endianness is always little-endianness so byte
+    /// representation is consistent across different platforms.
+    #[inline(always)]
+    pub fn bytes(&self) -> [u8; 16] {
+        self.0.to_le_bytes()
+    }
+
+    /// Creates a flake id from an array of 16 bytes. Endianness of the byte array is assumed to be
+    /// little endianess.
+    pub fn from_bytes(bytes: [u8; 16]) -> Flake {
+        Flake::new(u128::from_le_bytes(bytes))
+    }
 }
 
 impl PartialEq for Flake {
@@ -51,5 +64,18 @@ impl Binary for Flake {
 impl Display for Flake {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str(&BASE64.encode(&self.0.to_be_bytes()))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Flake;
+
+    #[test]
+    fn test_byte_repr() {
+        let id0 = Flake::new(29866156537351941961353716432896);
+        let bytes = id0.bytes();
+        let id1 = Flake::from_bytes(bytes);
+        assert_eq!(id0, id1);
     }
 }
