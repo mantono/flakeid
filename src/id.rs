@@ -1,5 +1,7 @@
 use core::hash::Hash;
 use data_encoding::BASE64;
+use std::convert::{TryFrom, TryInto};
+use std::str::FromStr;
 use std::{
     fmt::{Binary, Display},
     u128,
@@ -28,6 +30,13 @@ impl Flake {
     /// little endianess.
     pub fn from_bytes(bytes: [u8; 16]) -> Flake {
         Flake::new(u128::from_le_bytes(bytes))
+    }
+
+    /// Returns a timestamp in form of number of **milliseconds** since UNIX epoch time
+    /// (1st of January 1970 UTC).
+    pub fn timestamp(&self) -> u64 {
+        let ts: u128 = self.0 >> 64;
+        u64::try_from(ts).expect("Timestamp must fit into an usigned 64 bit integer")
     }
 }
 
@@ -67,6 +76,29 @@ impl Display for Flake {
     }
 }
 
+impl FromStr for Flake {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let s: String = s.to_string();
+        let bytes = s.as_bytes();
+        let decoded: Vec<u8> = match &BASE64.decode(bytes) {
+            Ok(vec) => vec.clone(),
+            Err(e) => match e.kind {
+                data_encoding::DecodeKind::Length => todo!(),
+                data_encoding::DecodeKind::Symbol => todo!(),
+                data_encoding::DecodeKind::Trailing => todo!(),
+                data_encoding::DecodeKind::Padding => todo!(),
+            },
+        };
+        let bytes: [u8; 16] = match decoded.try_into() {
+            Ok(arr) => arr,
+            Err(_) => todo!("Unable to convert slice to array"),
+        };
+        Ok(Self::from_bytes(bytes))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::Flake;
@@ -78,4 +110,15 @@ mod tests {
         let id1 = Flake::from_bytes(bytes);
         assert_eq!(id0, id1);
     }
+
+    #[test]
+    fn test_from_str() {
+        let id0 = Flake::new(29866156537351941961353716432896);
+        let string_flake: String = id0.to_string();
+        let id1: Flake = string_flake.parse().unwrap();
+        assert_eq!(id0, id1);
+    }
+
+    #[test]
+    fn test_timestamp() {}
 }

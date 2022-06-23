@@ -1,0 +1,1 @@
+If you want to run an example, do `cargo run --example generate` for example file `generate.rs`.
