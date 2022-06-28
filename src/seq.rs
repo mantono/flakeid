@@ -2,18 +2,10 @@ use std::time::{Duration, SystemTime};
 
 use crate::gen::FlakeErr;
 
+#[derive(Default)]
 pub(crate) struct SeqGen {
     timestamp: u128,
     seq: u16,
-}
-
-impl Default for SeqGen {
-    fn default() -> Self {
-        SeqGen {
-            timestamp: 0,
-            seq: 0,
-        }
-    }
 }
 
 impl SeqGen {
