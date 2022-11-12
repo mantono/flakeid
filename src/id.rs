@@ -94,3 +94,24 @@ mod tests {
         assert_eq!(1656452611131, ts);
     }
 }
+
+pub mod snow {
+    use std::ops::RangeInclusive;
+
+    pub struct SnowFlake(u64);
+
+    const TS_MASK: u128 = 0b01111111_11111111_11111111_11111111_11111111_11000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_;
+    const TS_MASK: u128 = 0b01111111_11111111_11111111_11111111_11111111_11000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_;
+
+    const fn mask(len: u8, rng: RangeInclusive<u8>) -> u128 {0}
+
+    /// Transform a Flake ID to a Snowflake ID, which means that we need to change
+    ///                     TTTTTTTT TTTTTTTT TTTTTTTT TTTTTTTT TTTTTTTT TTTTTTTT TTTTTTTT TTTTTTTT NNNNNNNN NNNNNNNN NNNNNNNN NNNNNNNN NNNNNNN NNNNNNNNN NNNNNNNN SSSSSSSS SSSSSSSS
+    /// XTTTTTTT TTTTTTTT TTTTTTTT TTTTTTTT TTTTTTTT TTNNNNNN NNNNSSSS SSSSSSSS
+    impl From<super::Flake> for SnowFlake {
+        fn from(flake: super::Flake) -> Self {
+            let ts: u64 = flake.timestamp() >> 1;
+            let ts: u64 = ts & 0b
+        }
+    }
+}
