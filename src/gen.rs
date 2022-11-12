@@ -3,39 +3,50 @@ use mac_address::{get_mac_address, MacAddress, MacAddressError};
 use crate::{id::Flake, seq::SeqGen};
 
 pub struct FlakeGen {
-    mac_addr: u64,
+    node_id: u64,
     seq: SeqGen,
 }
 
-const ADDR_BITS: usize = 48;
+const NODE_BITS: usize = 48;
 const SEQ_BITS: usize = 16;
 
 impl FlakeGen {
-    /// Create a new flake ID generator. The creation may fail if it is not possible to find any
-    /// device with a MAC address.
+    /// Create a new flake ID generator with the given `node_id` as the unique identifier for this
+    /// generator of Flake IDs.
     /// ```
     /// use flakeid::id::Flake;
     /// use flakeid::gen::FlakeGen;
-    /// let mut gen = FlakeGen::new().expect("Creating generator failed");
+    /// let mut gen = FlakeGen::new(0xC0FEE);
     /// let id: Flake = gen.next().expect("No ID was generated");
     /// ```
-    pub fn new() -> Result<FlakeGen, FlakeGenErr> {
+    pub fn new(node_id: u64) -> FlakeGen {
+        FlakeGen {
+            node_id,
+            seq: SeqGen::default(),
+        }
+    }
+
+    /// Create a new flake ID generator, using the MAC address of the current host as node ID.
+    /// The creation may fail if it is not possible to resolve a MAC address for this host.
+    /// ```
+    /// use flakeid::id::Flake;
+    /// use flakeid::gen::FlakeGen;
+    /// let mut gen = FlakeGen::with_mac_addr().expect("Creating generator failed");
+    /// let id: Flake = gen.next().expect("No ID was generated");
+    /// ```
+    pub fn with_mac_addr() -> Result<FlakeGen, FlakeGenErr> {
         let mac_addr: MacAddress = get_mac_address()?.ok_or(FlakeGenErr::NoMacAddr)?;
         let mac_addr: u64 =
             mac_addr.bytes().iter().fold(0u64, |acc, value| (acc << 8) + (*value as u64));
 
-        let gen = FlakeGen {
-            mac_addr,
-            seq: SeqGen::default(),
-        };
-        Ok(gen)
+        Ok(Self::new(mac_addr))
     }
 
     /// Try to generate a flake ID. The generation may fail if a clock skew occurs or if
     /// the sequence number has been exhausted, but should otherwise generate an ID successfully.
     pub fn try_next(&mut self) -> Result<Flake, FlakeErr> {
         let (timestamp, seq): (u128, u16) = self.seq.try_next()?;
-        let value: u128 = Self::build(timestamp, self.mac_addr, seq);
+        let value: u128 = Self::build(timestamp, self.node_id, seq);
         Ok(Flake::new(value))
     }
 
@@ -48,7 +59,7 @@ impl FlakeGen {
     fn build(time: u128, node: u64, seq: u16) -> u128 {
         let node: u128 = node as u128;
         let seq: u128 = seq as u128;
-        let time = time << (ADDR_BITS + SEQ_BITS);
+        let time = time << (NODE_BITS + SEQ_BITS);
         let node = node << SEQ_BITS;
 
         node ^ time ^ seq
@@ -143,7 +154,7 @@ mod tests {
 
     #[test]
     fn two_ids_are_not_same() {
-        let mut gen = FlakeGen::new().unwrap();
+        let mut gen = FlakeGen::with_mac_addr().unwrap();
         let id1: Flake = gen.next().unwrap();
         let id2: Flake = gen.next().unwrap();
         assert_ne!(id1, id2);
@@ -151,7 +162,7 @@ mod tests {
 
     #[test]
     fn test_first_id_less_than_second() {
-        let mut gen = FlakeGen::new().unwrap();
+        let mut gen = FlakeGen::with_mac_addr().unwrap();
         let id1: Flake = gen.next().unwrap();
         let id2: Flake = gen.next().unwrap();
         assert!(id1 < id2);
