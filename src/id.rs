@@ -1,6 +1,7 @@
 use core::hash::Hash;
 use data_encoding::BASE64;
 use std::convert::TryFrom;
+use std::fmt::{LowerHex, UpperHex};
 use std::{
     fmt::{Binary, Display},
     u128,
@@ -66,6 +67,18 @@ impl Hash for Flake {
 impl Binary for Flake {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Binary::fmt(&self.0, f)
+    }
+}
+
+impl LowerHex for Flake {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        LowerHex::fmt(&self.value(), f)
+    }
+}
+
+impl UpperHex for Flake {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        UpperHex::fmt(&self.value(), f)
     }
 }
 
