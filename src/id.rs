@@ -1,5 +1,7 @@
 use core::hash::Hash;
 use data_encoding::BASE64;
+use std::convert::TryFrom;
+use std::fmt::{LowerHex, UpperHex};
 use std::{
     fmt::{Binary, Display},
     u128,
@@ -28,6 +30,13 @@ impl Flake {
     /// little endianess.
     pub fn from_bytes(bytes: [u8; 16]) -> Flake {
         Flake::new(u128::from_le_bytes(bytes))
+    }
+
+    /// Returns a timestamp in form of number of **milliseconds** since UNIX epoch time
+    /// (1st of January 1970 UTC).
+    pub fn timestamp(&self) -> u64 {
+        let ts: u128 = self.0 >> 64;
+        u64::try_from(ts).expect("Timestamp must fit into an usigned 64 bit integer")
     }
 }
 
@@ -61,6 +70,18 @@ impl Binary for Flake {
     }
 }
 
+impl LowerHex for Flake {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        LowerHex::fmt(&self.value(), f)
+    }
+}
+
+impl UpperHex for Flake {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        UpperHex::fmt(&self.value(), f)
+    }
+}
+
 impl Display for Flake {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str(&BASE64.encode(&self.0.to_be_bytes()))
@@ -77,5 +98,12 @@ mod tests {
         let bytes = id0.bytes();
         let id1 = Flake::from_bytes(bytes);
         assert_eq!(id0, id1);
+    }
+
+    #[test]
+    fn test_timestamp() {
+        let id = Flake::new(30556157387769903979283677052928);
+        let ts: u64 = id.timestamp();
+        assert_eq!(1656452611131, ts);
     }
 }
