@@ -1,5 +1,3 @@
-use std::thread::Thread;
-
 use flakeid::gen::FlakeGen;
 
 fn main() {
