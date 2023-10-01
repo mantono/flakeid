@@ -10,6 +10,7 @@ pub struct FlakeGen {
 const NODE_BITS: usize = 48;
 const SEQ_BITS: usize = 16;
 
+/// TEST!
 impl FlakeGen {
     /// Create a new flake ID generator with the given `node_id` as the unique identifier for this
     /// generator of Flake IDs.
