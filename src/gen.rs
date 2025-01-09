@@ -69,11 +69,14 @@ impl FlakeGen {
 impl Iterator for FlakeGen {
     type Item = Flake;
 
+    /// Yield the next Flake identifier. Will return `None` if there was an error when trying to
+    /// create an identifier.
     fn next(&mut self) -> Option<Self::Item> {
         self.try_next().ok()
     }
 }
 
+/// A FlakeGenError is an error that could happen when we try to create a _generator_ (`FlakeGen`)
 #[derive(Debug)]
 #[non_exhaustive]
 pub enum FlakeGenErr {
@@ -88,6 +91,7 @@ impl From<MacAddressError> for FlakeGenErr {
     }
 }
 
+/// A FlakeErr is an error that could happen when we try to generate an _identifier_ (`Flake`)
 #[derive(Debug)]
 pub enum FlakeErr {
     /// A time drift (or clock skew) occured backwards in time on the host operating system.
