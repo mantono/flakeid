@@ -1,3 +1,5 @@
+use std::{error::Error, fmt::Display};
+
 use mac_address::{get_mac_address, MacAddress, MacAddressError};
 
 use crate::{id::Flake, seq::SeqGen};
@@ -35,7 +37,11 @@ impl FlakeGen {
     /// let id: Flake = gen.next().expect("No ID was generated");
     /// ```
     pub fn with_mac_addr() -> Result<FlakeGen, FlakeGenErr> {
-        let mac_addr: MacAddress = get_mac_address()?.ok_or(FlakeGenErr::NoMacAddr)?;
+        let mac_addr: MacAddress = match get_mac_address() {
+            Ok(Some(addr)) => addr,
+            Ok(None) => return Err(FlakeGenErr::NoMacAddr(None)),
+            Err(err) => return Err(FlakeGenErr::NoMacAddr(Some(err))),
+        };
         let mac_addr: u64 =
             mac_addr.bytes().iter().fold(0u64, |acc, value| (acc << 8) + (*value as u64));
 
@@ -82,14 +88,33 @@ impl Iterator for FlakeGen {
 pub enum FlakeGenErr {
     /// No MAC address could be found on the host device, which makes it impossible to generate
     /// flake ids that are globally unique.
-    NoMacAddr,
+    NoMacAddr(Option<MacAddressError>),
 }
 
-impl From<MacAddressError> for FlakeGenErr {
-    fn from(_: MacAddressError) -> Self {
-        FlakeGenErr::NoMacAddr
+impl Display for FlakeGenErr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("unable to acquire MAC address")
     }
 }
+
+impl Error for FlakeGenErr {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        match self {
+            FlakeGenErr::NoMacAddr(Some(err)) => Some(err),
+            FlakeGenErr::NoMacAddr(None) => None,
+        }
+    }
+
+    fn cause(&self) -> Option<&dyn Error> {
+        self.source()
+    }
+}
+
+// impl From<MacAddressError> for FlakeGenErr {
+//     fn from(err: MacAddressError) -> Self {
+//         FlakeGenErr::NoMacAddr(Some(err))
+//     }
+// }
 
 /// A FlakeErr is an error that could happen when we try to generate an _identifier_ (`Flake`)
 #[derive(Debug)]
