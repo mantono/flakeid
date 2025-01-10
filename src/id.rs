@@ -1,12 +1,31 @@
 use core::hash::Hash;
 use data_encoding::BASE64;
 use std::convert::TryFrom;
+use std::fmt::{Binary, Display};
 use std::fmt::{LowerHex, UpperHex};
-use std::{
-    fmt::{Binary, Display},
-    u128,
-};
 
+/// A Flake identifier (ID) is an identifier which consists of three different parts:
+/// 1. Timestamp (in milliseconds from the [UNIX epoch](https://en.wikipedia.org/wiki/Unix_time))
+/// 2. "Node" identifier, usually a MAC address
+/// 3. Sequence number
+///
+/// These three parts together will make up an identifier, which is time ordered. This means that if flake identifier _a_ is created before flake identifier _b_, then _a_ is lexically ordered before _b_.
+///
+/// ```
+/// # use flakeid::id::Flake;
+/// # use flakeid::gen::FlakeGen;
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// let mut gen = FlakeGen::new(0xC0FFEE);
+/// let a: Flake = gen.try_next()?;
+/// let b: Flake = gen.try_next()?;
+/// assert!(a < b);
+/// # Ok(())
+/// # }
+/// ```
+///
+/// Internally, the flake identifier is represented as a `u128`, where the first 64 bits are the
+/// timestamp, the next 48 bits are the node identifier and the last 18 bits are the sequence
+/// number.
 #[derive(Debug, Eq, Clone, Copy)]
 pub struct Flake(u128);
 

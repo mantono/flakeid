@@ -3,6 +3,7 @@ use thiserror::Error;
 
 use crate::{id::Flake, seq::SeqGen};
 
+/// A FlakeGen is the struct which is used to generate [Flake] identifiers
 pub struct FlakeGen {
     node_id: u64,
     seq: SeqGen,
@@ -15,10 +16,13 @@ impl FlakeGen {
     /// Create a new flake ID generator with the given `node_id` as the unique identifier for this
     /// generator of Flake IDs.
     /// ```
-    /// use flakeid::id::Flake;
-    /// use flakeid::gen::FlakeGen;
+    /// # use flakeid::id::Flake;
+    /// # use flakeid::gen::FlakeGen;
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let mut gen = FlakeGen::new(0xC0FEE);
-    /// let id: Flake = gen.next().expect("No ID was generated");
+    /// let id: Flake = gen.try_next()?;
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn new(node_id: u64) -> FlakeGen {
         FlakeGen {
@@ -30,10 +34,13 @@ impl FlakeGen {
     /// Create a new flake ID generator, using the MAC address of the current host as node ID.
     /// The creation may fail if it is not possible to resolve a MAC address for this host.
     /// ```
-    /// use flakeid::id::Flake;
-    /// use flakeid::gen::FlakeGen;
-    /// let mut gen = FlakeGen::with_mac_addr().expect("Creating generator failed");
-    /// let id: Flake = gen.next().expect("No ID was generated");
+    /// # use flakeid::id::Flake;
+    /// # use flakeid::gen::FlakeGen;
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let mut gen = FlakeGen::with_mac_addr()?;
+    /// let id: Flake = gen.try_next()?;
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn with_mac_addr() -> Result<FlakeGen, FlakeGenErr> {
         let mac_addr: MacAddress = get_mac_address()?.ok_or(FlakeGenErr::NoMacAddr)?;
