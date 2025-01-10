@@ -1,6 +1,5 @@
-use std::{error::Error, fmt::Display};
-
-use mac_address::{get_mac_address, MacAddress, MacAddressError};
+use mac_address::{get_mac_address, MacAddress};
+use thiserror::Error;
 
 use crate::{id::Flake, seq::SeqGen};
 
@@ -39,8 +38,7 @@ impl FlakeGen {
     pub fn with_mac_addr() -> Result<FlakeGen, FlakeGenErr> {
         let mac_addr: MacAddress = match get_mac_address() {
             Ok(Some(addr)) => addr,
-            Ok(None) => return Err(FlakeGenErr::NoMacAddr(None)),
-            Err(err) => return Err(FlakeGenErr::NoMacAddr(Some(err))),
+            _ => return Err(FlakeGenErr::NoMacAddr),
         };
         let mac_addr: u64 =
             mac_addr.bytes().iter().fold(0u64, |acc, value| (acc << 8) + (*value as u64));
@@ -83,51 +81,29 @@ impl Iterator for FlakeGen {
 }
 
 /// A FlakeGenError is an error that could happen when we try to create a _generator_ (`FlakeGen`)
-#[derive(Debug)]
+#[derive(Debug, Error)]
 #[non_exhaustive]
 pub enum FlakeGenErr {
     /// No MAC address could be found on the host device, which makes it impossible to generate
     /// flake ids that are globally unique.
-    NoMacAddr(Option<MacAddressError>),
+    #[error("unable to acquire MAC address")]
+    NoMacAddr,
 }
-
-impl Display for FlakeGenErr {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str("unable to acquire MAC address")
-    }
-}
-
-impl Error for FlakeGenErr {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        match self {
-            FlakeGenErr::NoMacAddr(Some(err)) => Some(err),
-            FlakeGenErr::NoMacAddr(None) => None,
-        }
-    }
-
-    fn cause(&self) -> Option<&dyn Error> {
-        self.source()
-    }
-}
-
-// impl From<MacAddressError> for FlakeGenErr {
-//     fn from(err: MacAddressError) -> Self {
-//         FlakeGenErr::NoMacAddr(Some(err))
-//     }
-// }
 
 /// A FlakeErr is an error that could happen when we try to generate an _identifier_ (`Flake`)
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum FlakeErr {
     /// A time drift (or clock skew) occured backwards in time on the host operating system.
     /// Generating new IDs while the current OS time is earlier than the time of generation for the
     /// last succesfully generated ID is not safe, since it could result in the same ID being
     /// generated twice.
+    #[error("time drift of clock skew occurred")]
     TimeDrift,
     /// The sequence number has been temporarily exhausted. This will happen if more IDs than
     /// what can be held in two bytes (65 536) is generated in a millisecond. When this occurs it is
     /// always possible to retry generating a flake ID the next millisecond since that will reset
     /// the sequence counter.
+    #[error("sequence counter exhausted")]
     Exhausted,
 }
 
