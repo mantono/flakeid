@@ -26,17 +26,19 @@ impl Flake {
         self.0.to_le_bytes()
     }
 
-    /// Creates a flake id from an array of 16 bytes. Endianness of the byte array is assumed to be
-    /// little endianess.
-    pub fn from_bytes(bytes: [u8; 16]) -> Flake {
-        Flake::new(u128::from_le_bytes(bytes))
-    }
-
     /// Returns a timestamp in form of number of **milliseconds** since UNIX epoch time
     /// (1st of January 1970 UTC).
     pub fn timestamp(&self) -> u64 {
         let ts: u128 = self.0 >> 64;
         u64::try_from(ts).expect("Timestamp must fit into an usigned 64 bit integer")
+    }
+}
+
+impl From<[u8; 16]> for Flake {
+    /// Creates a flake id from an array of 16 bytes. Endianness of the byte array is assumed to be
+    /// little endianess.
+    fn from(value: [u8; 16]) -> Self {
+        Flake::new(u128::from_le_bytes(value))
     }
 }
 
@@ -96,7 +98,7 @@ mod tests {
     fn test_byte_repr() {
         let id0 = Flake::new(29866156537351941961353716432896);
         let bytes = id0.bytes();
-        let id1 = Flake::from_bytes(bytes);
+        let id1: Flake = bytes.into();
         assert_eq!(id0, id1);
     }
 
