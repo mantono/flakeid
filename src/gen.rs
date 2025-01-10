@@ -1,4 +1,4 @@
-use mac_address::{get_mac_address, MacAddress};
+use mac_address::{get_mac_address, MacAddress, MacAddressError};
 use thiserror::Error;
 
 use crate::{id::Flake, seq::SeqGen};
@@ -36,10 +36,7 @@ impl FlakeGen {
     /// let id: Flake = gen.next().expect("No ID was generated");
     /// ```
     pub fn with_mac_addr() -> Result<FlakeGen, FlakeGenErr> {
-        let mac_addr: MacAddress = match get_mac_address() {
-            Ok(Some(addr)) => addr,
-            _ => return Err(FlakeGenErr::NoMacAddr),
-        };
+        let mac_addr: MacAddress = get_mac_address()?.ok_or(FlakeGenErr::NoMacAddr)?;
         let mac_addr: u64 =
             mac_addr.bytes().iter().fold(0u64, |acc, value| (acc << 8) + (*value as u64));
 
@@ -88,6 +85,12 @@ pub enum FlakeGenErr {
     /// flake ids that are globally unique.
     #[error("unable to acquire MAC address")]
     NoMacAddr,
+}
+
+impl From<MacAddressError> for FlakeGenErr {
+    fn from(_: MacAddressError) -> Self {
+        FlakeGenErr::NoMacAddr
+    }
 }
 
 /// A FlakeErr is an error that could happen when we try to generate an _identifier_ (`Flake`)
