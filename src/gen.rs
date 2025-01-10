@@ -1,4 +1,5 @@
 use mac_address::{get_mac_address, MacAddress, MacAddressError};
+use thiserror::Error;
 
 use crate::{id::Flake, seq::SeqGen};
 
@@ -77,11 +78,12 @@ impl Iterator for FlakeGen {
 }
 
 /// A FlakeGenError is an error that could happen when we try to create a _generator_ (`FlakeGen`)
-#[derive(Debug)]
+#[derive(Debug, Error)]
 #[non_exhaustive]
 pub enum FlakeGenErr {
     /// No MAC address could be found on the host device, which makes it impossible to generate
     /// flake ids that are globally unique.
+    #[error("unable to acquire MAC address")]
     NoMacAddr,
 }
 
@@ -92,17 +94,19 @@ impl From<MacAddressError> for FlakeGenErr {
 }
 
 /// A FlakeErr is an error that could happen when we try to generate an _identifier_ (`Flake`)
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum FlakeErr {
     /// A time drift (or clock skew) occured backwards in time on the host operating system.
     /// Generating new IDs while the current OS time is earlier than the time of generation for the
     /// last succesfully generated ID is not safe, since it could result in the same ID being
     /// generated twice.
+    #[error("time drift of clock skew occurred")]
     TimeDrift,
     /// The sequence number has been temporarily exhausted. This will happen if more IDs than
     /// what can be held in two bytes (65 536) is generated in a millisecond. When this occurs it is
     /// always possible to retry generating a flake ID the next millisecond since that will reset
     /// the sequence counter.
+    #[error("sequence counter exhausted")]
     Exhausted,
 }
 
