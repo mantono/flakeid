@@ -16,9 +16,9 @@ impl FlakeGen {
     /// generator of Flake IDs.
     /// ```
     /// use flakeid::id::Flake;
-    /// use flakeid::gen::FlakeGen;
-    /// let mut gen = FlakeGen::new(0xC0FEE);
-    /// let id: Flake = gen.next().expect("No ID was generated");
+    /// use flakeid::generator::FlakeGen;
+    /// let mut generator = FlakeGen::new(0xC0FEE);
+    /// let id: Flake = generator.next().expect("No ID was generated");
     /// ```
     pub fn new(node_id: u64) -> FlakeGen {
         FlakeGen {
@@ -31,9 +31,9 @@ impl FlakeGen {
     /// The creation may fail if it is not possible to resolve a MAC address for this host.
     /// ```
     /// use flakeid::id::Flake;
-    /// use flakeid::gen::FlakeGen;
-    /// let mut gen = FlakeGen::with_mac_addr().expect("Creating generator failed");
-    /// let id: Flake = gen.next().expect("No ID was generated");
+    /// use flakeid::generator::FlakeGen;
+    /// let mut generator = FlakeGen::with_mac_addr().expect("Creating generator failed");
+    /// let id: Flake = generator.next().expect("No ID was generated");
     /// ```
     pub fn with_mac_addr() -> Result<FlakeGen, FlakeGenErr> {
         let mac_addr: MacAddress = get_mac_address()?.ok_or(FlakeGenErr::NoMacAddr)?;
@@ -112,7 +112,7 @@ pub enum FlakeErr {
 
 #[cfg(test)]
 mod tests {
-    use crate::gen::FlakeGen;
+    use crate::generator::FlakeGen;
     use crate::id::Flake;
 
     #[quickcheck]
@@ -162,17 +162,17 @@ mod tests {
 
     #[test]
     fn two_ids_are_not_same() {
-        let mut gen = FlakeGen::with_mac_addr().unwrap();
-        let id1: Flake = gen.next().unwrap();
-        let id2: Flake = gen.next().unwrap();
+        let mut generator = FlakeGen::with_mac_addr().unwrap();
+        let id1: Flake = generator.next().unwrap();
+        let id2: Flake = generator.next().unwrap();
         assert_ne!(id1, id2);
     }
 
     #[test]
     fn test_first_id_less_than_second() {
-        let mut gen = FlakeGen::with_mac_addr().unwrap();
-        let id1: Flake = gen.next().unwrap();
-        let id2: Flake = gen.next().unwrap();
+        let mut generator = FlakeGen::with_mac_addr().unwrap();
+        let id1: Flake = generator.next().unwrap();
+        let id2: Flake = generator.next().unwrap();
         assert!(id1 < id2);
         assert!(id2 > id1);
     }
