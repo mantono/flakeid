@@ -86,7 +86,7 @@ impl UpperHex for Flake {
 
 impl Display for Flake {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(&BASE64.encode(&self.0.to_be_bytes()))
+        f.write_str(&BASE64.encode(&self.0.to_le_bytes()))
     }
 }
 
