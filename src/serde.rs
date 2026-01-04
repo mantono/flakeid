@@ -47,7 +47,7 @@ impl<'de> Visitor<'de> for FlakeVisitor {
         for (i, byte) in decoded_bytes.iter().take(bytes.len()).enumerate() {
             bytes[i] = *byte;
         }
-        let value = u128::from_be_bytes(bytes);
+        let value = u128::from_le_bytes(bytes);
         Ok(Flake::new(value))
     }
 
@@ -62,5 +62,5 @@ impl<'de> Visitor<'de> for FlakeVisitor {
 #[test]
 fn test_serde() {
     let id = Flake::new(29866156537351941961353716432896);
-    assert_tokens(&id, &[Token::String("AAABePbBqL900Cue9CYAAA==")]);
+    assert_tokens(&id, &[Token::String("AAAm9J4r0HS/qMH2eAEAAA==")]);
 }

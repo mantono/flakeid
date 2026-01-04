@@ -86,7 +86,7 @@ impl UpperHex for Flake {
 
 impl Display for Flake {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(&BASE64.encode(&self.0.to_be_bytes()))
+        f.write_str(&BASE64.encode(&self.0.to_le_bytes()))
     }
 }
 
@@ -107,5 +107,13 @@ mod tests {
         let id = Flake::new(30556157387769903979283677052928);
         let ts: u64 = id.timestamp();
         assert_eq!(1656452611131, ts);
+    }
+
+    #[test]
+    fn test_display_uses_little_endian() {
+        let id = Flake::new(29866156537351941961353716432896);
+        let display_str = format!("{}", id);
+        // Display should use little-endian base64 representation
+        assert_eq!(display_str, "AAAm9J4r0HS/qMH2eAEAAA==");
     }
 }
