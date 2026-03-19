@@ -8,7 +8,7 @@ extern crate serde_test;
 #[macro_use(quickcheck)]
 extern crate quickcheck_macros;
 
-pub mod gen;
+pub mod generator;
 pub mod id;
 mod seq;
 

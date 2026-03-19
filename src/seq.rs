@@ -1,6 +1,6 @@
 use std::time::{Duration, SystemTime};
 
-use crate::gen::FlakeErr;
+use crate::generator::FlakeErr;
 
 #[derive(Default)]
 pub(crate) struct SeqGen {
