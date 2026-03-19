@@ -52,7 +52,7 @@ impl FlakeGen {
     }
 
     /// Perform the neccessary bit manipulations to transform
-    /// 0000 0000 aaaa aaaa (timestamp) << 16 * 8
+    /// 0000 0000 aaaa aaaa (timestamp) << 8 * 8
     /// 0000 0000 00bb bbbb (node) << 2 * 8
     /// 0000 0000 0000 00cc (seq)
     /// into                XOR
